@@ -239,19 +239,25 @@ export class Game {
         ctx.restore();
     }
 
-    renderUI(ctx) {
+        renderUI(ctx) {
         ctx.clearRect(0, 0, 1000, 600);
-        ctx.fillStyle = '#00ffff'; ctx.font = 'bold 20px sans-serif';
-        ctx.fillText(`⚡ ${Math.floor(this.energy)}`, 20, 40);
-        ctx.fillStyle = '#ff0055'; ctx.fillText(`❤️ ${this.baseHp}`, 20, 75);
+        ctx.font = 'bold 14px sans-serif'; // Еще меньше шрифт
+        
+        ctx.fillStyle = '#00ffff'; 
+        ctx.fillText(`⚡ ${Math.floor(this.energy)}`, 10, 20);
+// и вторая
+ctx.fillText(`❤️ ${this.baseHp}`, 10, 40);
+            
     }
 
     drawEnd(ctx, txt, col) {
         ctx.fillStyle = 'rgba(0,0,0,0.85)'; ctx.fillRect(0,0,1000,600);
-        ctx.fillStyle = col; ctx.font = '900 80px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillStyle = col; 
+        ctx.font = '900 40px sans-serif'; // Уменьшил заголовок ПОБЕДА/ПОРАЖЕНИЕ в 2 раза
+        ctx.textAlign = 'center';
         ctx.fillText(txt, 500, 280);
-        ctx.font = 'bold 24px sans-serif'; ctx.fillStyle = '#fff';
-        ctx.fillText("НАЖМИТЕ ДЛЯ ПРОДОЛЖЕНИЯ", 500, 380);
+        
+        ctx.font = 'bold 16px sans-serif'; ctx.fillStyle = '#fff';
+        ctx.fillText("КЛИКНИТЕ ДЛЯ ПРОДОЛЖЕНИЯ", 500, 340);
     }
-                    }
-            
+    
