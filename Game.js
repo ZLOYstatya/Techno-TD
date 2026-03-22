@@ -102,18 +102,30 @@ export class Game {
         this.uiCanvas.addEventListener('pointerdown', this.handleInput.bind(this));
     }
 
-    renderLevels() {
-        const grid = document.getElementById('levels-grid'); grid.innerHTML = '';
-        for(let i=0; i<100; i++) {
-            const b = document.createElement('button'); b.className = 'level-btn'; b.innerText = i+1;
-            if(i > this.maxUnlockedLevel) b.style.opacity = 0.2;
-            else b.addEventListener('pointerdown', () => {
-                document.getElementById('main-menu').classList.add('hidden');
-                this.isMenu = false; this.loadLevel(i); this.loop.start();
-            });
+        renderLevels() {
+        const grid = document.getElementById('levels-grid');
+        grid.innerHTML = '';
+        for (let i = 0; i < 100; i++) {
+            const b = document.createElement('button');
+            b.className = 'level-btn';
+            b.innerText = i + 1;
+            
+            if (i > this.maxUnlockedLevel) {
+                b.style.opacity = 0.2;
+                b.style.filter = 'grayscale(1)';
+            } else {
+                // ИСПОЛЬЗУЕМ 'click', чтобы можно было листать список уровней
+                b.addEventListener('click', () => {
+                    document.getElementById('main-menu').classList.add('hidden');
+                    this.isMenu = false;
+                    this.loadLevel(i);
+                    this.loop.start();
+                });
+            }
             grid.appendChild(b);
         }
-    }
+        }
+    
 
     loadLevel(idx) {
         this.currentLevelIndex = idx; this.currentMap = ProgressionSystem.generateLevel(idx);
@@ -131,23 +143,34 @@ export class Game {
         setTimeout(() => { if(!this.isPaused && !this.isMenu) this.waveManager.startNextWave(this.currentMap.waypoints); }, 2000);
     }
 
-    updateTowerUI() {
-        const p = document.getElementById('ui-panel'); p.innerHTML = '';
+        updateTowerUI() {
+        const p = document.getElementById('ui-panel'); 
+        if (!p) return;
+        p.innerHTML = '';
+        
+        // Импортируем базу данных башен (предположим, она доступна глобально или импортирована)
         TOWERS_DB.forEach(t => {
             if (this.maxUnlockedLevel + 1 >= t.unlock) {
-                const b = document.createElement('div'); b.className = 'tower-btn';
+                const b = document.createElement('div'); 
+                b.className = 'tower-btn';
                 if(this.selectedTowerType === t.id) b.classList.add('selected');
-                b.innerHTML = `<div class="tower-icon" style="background-color:${t.color}"></div>
-                               <div class="tower-info">${t.name}<br><span class="tower-cost">${t.cost}⚡</span></div>`;
-                b.addEventListener('pointerdown', (e) => {
+                
+                b.innerHTML = `
+                    <div class="tower-icon" style="background-color:${t.color}"></div>
+                    <div class="tower-info">${t.name}<br><b>${t.cost}⚡</b></div>`;
+                
+                // Используем 'click', чтобы можно было скроллить панель башен
+                b.addEventListener('click', (e) => {
                     e.stopPropagation();
                     this.selectedTowerType = (this.selectedTowerType === t.id) ? null : t.id;
-                    this.focusedTower = null; this.updateTowerUI();
+                    this.focusedTower = null;
+                    this.updateTowerUI();
                 });
                 p.appendChild(b);
             }
         });
-    }
+        }
+    
 
     handleInput(e) {
         // ЕСЛИ ПОБЕДА ИЛИ ПОРАЖЕНИЕ - ЛЮБОЙ КЛИК ПРОДОЛЖАЕТ
