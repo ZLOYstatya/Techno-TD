@@ -1,151 +1,174 @@
+/* 1. БАЗОВЫЕ НАСТРОЙКИ (Сброс и мобильная адаптация) */
 * {
     box-sizing: border-box;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-}
-
-body {
     margin: 0;
     padding: 0;
-    background-color: #0a0b10;
-    color: #00ffff;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+    user-select: none; /* Чтобы текст не выделялся при нажатиях */
+    -webkit-tap-highlight-color: transparent; /* Убираем синий квадрат при клике на Android */
 }
 
+body, html {
+    width: 100%;
+    height: 100%;
+    background-color: #050508;
+    color: #00ffff;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    overflow: hidden; /* Запрещаем скролл всей страницы */
+}
+
+/* 2. КОНТЕЙНЕР ИГРЫ */
 #game-container {
     position: relative;
     width: 100vw;
     height: 100vh;
-    background: #000;
     display: flex;
-    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
+/* 3. СЛОИ КАНВАСА (Наложение друг на друга) */
 canvas {
-    background: #0d0e14;
-    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
-    height: auto;
-    touch-action: none;
+    height: 100%;
+    display: block;
+    touch-action: none; /* Важно: отключаем стандартные жесты браузера для игры */
 }
 
-/* ГЛАВНОЕ МЕНЮ */
-#main-menu {
+#bg-layer { z-index: 1; background: #0d0e14; }
+#dynamic-layer { z-index: 2; background: transparent; }
+#ui-layer { z-index: 3; background: transparent; }
+
+/* 4. ОБЩИЙ СТИЛЬ ДЛЯ ВСЕХ МЕНЮ (Поверх игры) */
+#start-menu, #main-menu, #pause-menu {
     position: absolute;
     inset: 0;
-    background: rgba(10, 11, 16, 0.95);
+    background: rgba(10, 11, 16, 0.98);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    z-index: 100;
+    z-index: 1000; /* Самый высокий приоритет */
+    padding: 20px;
+    text-align: center;
 }
 
-#main-menu.hidden {
-    display: none;
+.hidden {
+    display: none !important;
 }
 
+/* 5. СЕТКА ВЫБОРА УРОВНЕЙ */
 #levels-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 12px;
-    width: 90%;
+    width: 95%;
     max-width: 500px;
     max-height: 60vh;
     overflow-y: auto;
-    padding: 20px;
+    padding: 15px;
     margin: 20px 0;
     background: rgba(255, 255, 255, 0.05);
-    border-radius: 15px;
-    /* Разрешаем только вертикальный свайп, чтобы он не конфликтовал с нажатиями */
-    touch-action: pan-y; 
+    border-radius: 12px;
     border: 1px solid #1f2233;
+    /* Разрешаем только вертикальный свайп пальцем */
+    touch-action: pan-y; 
 }
 
+/* 6. КНОПКИ */
 .level-btn {
     aspect-ratio: 1/1;
     background: #1a1c26;
     border: 2px solid #2d3142;
     color: #fff;
-    border-radius: 10px;
-    font-size: 1.2rem;
+    border-radius: 8px;
+    font-size: 1.1rem;
     font-weight: bold;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s;
+    transition: 0.1s;
 }
 
 .level-btn:active {
     background: #00ffff;
     color: #000;
-    transform: scale(0.9);
+    transform: scale(0.95);
 }
 
-/* ИНТЕРФЕЙС ИГРЫ */
+/* 7. ИНТЕРФЕЙС ВО ВРЕМЯ БОЯ (Верхняя панель) */
 #ui-overlay {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
-    padding: 10px;
+    z-index: 10;
+    padding: 15px;
     display: flex;
     justify-content: space-between;
-    pointer-events: none;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+    pointer-events: none; /* Чтобы не мешало кликать по карте */
 }
 
-.stat-item {
+#btn-pause, #btn-speed {
+    pointer-events: auto; /* А кнопки на панели должны кликаться */
+    background: rgba(0, 0, 0, 0.5);
+    padding: 8px 15px;
+    border-radius: 5px;
+    border: 1px solid #00ffff;
+    color: #00ffff;
     font-weight: bold;
-    text-shadow: 0 0 10px #00ffff;
 }
 
+/* 8. НИЖНЯЯ ПАНЕЛЬ БАШЕН */
 #ui-panel {
     position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 90px;
-    background: rgba(15, 17, 26, 0.9);
-    border-top: 2px solid #1f2233;
+    height: 100px;
+    background: rgba(15, 17, 26, 0.95);
+    border-top: 2px solid #00ffff;
     display: flex;
     align-items: center;
     padding: 0 10px;
     overflow-x: auto;
-    /* Разрешаем горизонтальный скролл башен */
-    touch-action: pan-x;
-    gap: 10px;
+    touch-action: pan-x; /* Разрешаем листать башни влево-вправо */
+    gap: 12px;
+    z-index: 10;
 }
 
 .tower-btn {
-    min-width: 70px;
-    height: 70px;
+    min-width: 80px;
+    height: 80px;
     background: #232736;
-    border-radius: 8px;
     border: 1px solid #3d445c;
+    border-radius: 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-size: 0.7rem;
-    color: #ccc;
+    font-size: 0.65rem;
+    color: #fff;
+    flex-shrink: 0;
 }
 
 .tower-btn.selected {
-    border-color: #00ffff;
+    border: 2px solid #00ffff;
     background: #1a3a4a;
-    box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
 }
 
 .tower-icon {
-    width: 24px;
-    height: 24px;
-    margin-bottom: 4px;
+    width: 28px;
+    height: 28px;
+    margin-bottom: 5px;
     border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.2);
 }
+
+.tower-info b {
+    color: #00ff00;
+    }
