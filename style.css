@@ -1,61 +1,155 @@
-* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+/* style.css — ПОЛНЫЙ, КОМБИНИРОВАННЫЙ КОД */
 
-body { 
-    background: #000; 
-    color: #0ff; 
-    font-family: sans-serif; 
-    overflow: hidden; 
-    width: 100vw; 
-    height: 100vh; 
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
-#game-container { position: relative; width: 100%; height: 100%; }
-
-/* Слои игры */
-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: block; }
-#bg-layer { z-index: 1; background: #0d0e14; }
-#dynamic-layer { z-index: 2; }
-#ui-layer { z-index: 3; }
-
-/* Меню */
-#start-menu, #main-menu, #pause-menu {
-    position: absolute; 
-    inset: 0; 
-    z-index: 100; 
-    background: rgba(0,0,0,0.9);
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
+body, html {
+    width: 100%;
+    height: 100%;
+    background-color: #050508; /* Очень темно-синий */
+    color: #00ffff; /* Ярко-бирюзовый */
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    overflow: hidden;
+    display: flex;
     justify-content: center;
+    align-items: center;
 }
 
-.hidden { display: none !important; }
+#game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+}
 
+/* СЛОИ КАНВАСА */
+canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    touch-action: none;
+}
+
+/* Задний фон (сетка) */
+#bg-layer { z-index: 1; background: #0d0e14; }
+/* Мобы и выстрелы */
+#dynamic-layer { z-index: 2; background: transparent; }
+/* Интерфейс здоровья и денег */
+#ui-layer { z-index: 3; background: transparent; }
+
+/* ОБЩИЙ СТИЛЬ ДЛЯ ВСЕХ МЕНЮ (Стартовое, Выбор уровней, Пауза) */
+#start-menu, #main-menu, #pause-menu {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 11, 16, 0.98);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* СЕТКА УРОВНЕЙ */
 #levels-grid {
-    display: grid; 
-    grid-template-columns: repeat(5, 1fr); 
-    gap: 10px; 
-    padding: 20px; 
-    max-height: 50vh; 
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 55vh;
     overflow-y: auto;
-    touch-action: pan-y;
+    padding: 15px;
+    margin: 20px 0;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    border: 1px solid #1f2233;
+    touch-action: pan-y; 
 }
 
+/* КНОПКИ */
 .level-btn {
-    width: 50px; height: 50px; background: #1a1c26; border: 1px solid #0ff;
-    color: #fff; border-radius: 5px; font-weight: bold;
+    aspect-ratio: 1/1;
+    background: #1a1c26;
+    border: 2px solid #2d3142;
+    color: #fff;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.1s;
 }
 
-/* Панель башен */
+.level-btn:active {
+    background: #00ffff;
+    color: #000;
+    transform: scale(0.95);
+}
+
+/* Панель здоровья/денег в игре */
+#ui-overlay {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: auto;
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* НИЖНЯЯ ПАНЕЛЬ БАШЕН */
 #ui-panel {
-    position: absolute; bottom: 0; left: 0; width: 100%; height: 80px;
-    background: rgba(0,0,0,0.8); z-index: 50; display: flex; padding: 10px;
-    overflow-x: auto; touch-action: pan-x; gap: 10px; border-top: 1px solid #0ff;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 90px;
+    background: rgba(15, 17, 26, 0.95);
+    border-top: 2px solid #00ffff;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    overflow-x: auto;
+    touch-action: pan-x;
+    gap: 12px;
+    z-index: 10;
 }
 
 .tower-btn {
-    min-width: 60px; height: 60px; background: #222; border: 1px solid #444;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    font-size: 10px; border-radius: 5px;
+    min-width: 70px;
+    height: 70px;
+    background: #232736;
+    border: 1px solid #3d445c;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    color: #fff;
 }
-.tower-btn.selected { border-color: #0ff; background: #003333; }
+
+.tower-btn.selected {
+    border: 2px solid #00ffff;
+    background: #1a3a4a;
+}
+
+.tower-icon {
+    width: 26px;
+    height: 26px;
+    margin-bottom: 4px;
+    border-radius: 50%;
+}
