@@ -1,60 +1,106 @@
-import { Enemy, EnemyTypes } from './Enemy.js';
-
 export class WaveManager {
-    constructor() { this.reset(); }
-
-    reset() {
-        this.activeEnemies = []; this.currentWaveIndex = 0; this.spawnTimer = 0;
-        this.enemiesQueue = []; this.isWaveActive = false; this.wavesConfig = [];
-        this.hpMultiplier = 1;
+    constructor() {
+        this.activeEnemies = [];
+        this.waves = [];
+        this.currentWaveIndex = -1;
+        this.spawnTimer = 0;
+        this.enemiesToSpawn = [];
+        this.isAllCleared = false;
     }
 
-    loadWaves(waves) { this.wavesConfig = waves; }
+    reset() {
+        this.activeEnemies = [];
+        this.currentWaveIndex = -1;
+        this.isAllCleared = false;
+        this.enemiesToSpawn = [];
+    }
 
-    get isAllCleared() { return this.currentWaveIndex >= this.wavesConfig.length && this.activeEnemies.length === 0 && this.enemiesQueue.length === 0 && !this.isWaveActive; }
+    loadWaves(wavesData) {
+        this.waves = wavesData;
+    }
 
-    startNextWave(currentPath) {
-        if (this.isWaveActive || this.currentWaveIndex >= this.wavesConfig.length) return;
-        this.isWaveActive = true; this.currentPath = currentPath;
-        const waveData = this.wavesConfig[this.currentWaveIndex];
-        
-        this.enemiesQueue = [];
-        for (const group of waveData.groups) {
-            for (let i = 0; i < group.count; i++) this.enemiesQueue.push({ type: group.type, delay: group.delay });
+    startNextWave(waypoints) {
+        this.currentWaveIndex++;
+        if (this.currentWaveIndex < this.waves.length) {
+            const wave = this.waves[this.currentWaveIndex];
+            this.enemiesToSpawn = [];
+            
+            // Импортируем типы врагов динамически (так как EnemyTypes в другом файле)
+            // Но обычно мы передаем уже готовый массив объектов
+            wave.groups.forEach(group => {
+                for (let i = 0; i < group.count; i++) {
+                    this.enemiesToSpawn.push({
+                        type: group.type,
+                        delay: group.delay,
+                        hpMultiplier: wave.hpMultiplier,
+                        waypoints: waypoints
+                    });
+                }
+            });
+            this.spawnTimer = 0;
         }
-        this.spawnTimer = this.enemiesQueue[0].delay;
     }
 
     update(dt) {
-        let energyGained = 0; let baseDamage = 0;
-        if (this.isWaveActive && this.enemiesQueue.length > 0) {
+        let energyGained = 0;
+        let baseDamage = 0;
+
+        // 1. СПАВН ВРАГОВ
+        if (this.enemiesToSpawn.length > 0) {
             this.spawnTimer -= dt;
             if (this.spawnTimer <= 0) {
-                const nextEnemyData = this.enemiesQueue.shift();
-                this.activeEnemies.push(new Enemy(EnemyTypes[nextEnemyData.type], this.currentPath, this.hpMultiplier));
-                if (this.enemiesQueue.length > 0) this.spawnTimer = this.enemiesQueue[0].delay;
+                const spawnData = this.enemiesToSpawn.shift();
+                this.spawnTimer = spawnData.delay;
+                this.spawnEnemy(spawnData);
             }
         }
 
+        // 2. ОБНОВЛЕНИЕ СУЩЕСТВУЮЩИХ ВРАГОВ
         for (let i = this.activeEnemies.length - 1; i >= 0; i--) {
-            const enemy = this.activeEnemies[i]; enemy.update(dt);
-            if (enemy.isDead) { 
-                this.activeEnemies.splice(i, 1); 
-                energyGained += enemy.reward || 10; // Выдаем Энергию за убийство!
-            } 
-            else if (enemy.hasReachedBase) { this.activeEnemies.splice(i, 1); baseDamage += 1; }
+            const enemy = this.activeEnemies[i];
+            enemy.update(dt);
+
+            // Если монстр убит башнями
+            if (enemy.isDead) {
+                energyGained += enemy.reward;
+                this.activeEnemies.splice(i, 1);
+                continue;
+            }
+
+            // Если монстр ДОШЕЛ ДО ЯДРА
+            if (enemy.hasReachedBase) {
+                baseDamage += 1; // Урон базе (можно сделать зависимым от типа монстра)
+                
+                // ВОТ ТВОЁ ОБНОВЛЕНИЕ: 
+                // Теперь даем энергию, даже если враг дошел до конца!
+                energyGained += enemy.reward; 
+                
+                this.activeEnemies.splice(i, 1);
+                continue;
+            }
         }
 
-        if (this.isWaveActive && this.enemiesQueue.length === 0 && this.activeEnemies.length === 0) {
-            this.isWaveActive = false; this.currentWaveIndex++;
-            if (this.currentWaveIndex < this.wavesConfig.length) setTimeout(() => this.startNextWave(this.currentPath), 3000);
+        // ПРОВЕРКА ПОБЕДЫ В УРОВНЕ
+        if (this.enemiesToSpawn.length === 0 && 
+            this.activeEnemies.length === 0 && 
+            this.currentWaveIndex === this.waves.length - 1) {
+            this.isAllCleared = true;
         }
+
         return { energyGained, baseDamage };
     }
 
+    // Вспомогательный метод для создания объекта Enemy
+    // В реальном проекте здесь нужно импортировать класс Enemy и EnemyTypes
+    async spawnEnemy(data) {
+        const { Enemy, EnemyTypes } = await import('./Enemy.js');
+        const stats = EnemyTypes[data.type];
+        if (stats) {
+            this.activeEnemies.push(new Enemy(stats, data.waypoints, data.hpMultiplier));
+        }
+    }
+
     render(ctx) {
-        this.activeEnemies.sort((a, b) => a.y - b.y);
-        for (const enemy of this.activeEnemies) enemy.render(ctx);
+        this.activeEnemies.forEach(enemy => enemy.render(ctx));
     }
 }
-
