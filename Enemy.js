@@ -3,7 +3,7 @@ import { GameConfig } from './Config.js';
 export const EnemyTypes = {
     SCOUT:     { type: 'scout', hp: 40, speed: 130, armor: 0, reward: 20, color: '#00ffff', radius: 10 },
     SWARM:     { type: 'swarm', hp: 20, speed: 150, armor: 0, reward: 12, color: '#ffaa00', radius: 7 },
-    TANK:      { type: 'tank', hp: 250, speed: 50, armor: 15, reward: 50, color: '#ff0055', radius: 16 },
+    TANK:      { type: 'tank', hp: 200, speed: 50, armor: 15, reward: 50, color: '#ff0055', radius: 16 },
     RUNNER:    { type: 'runner', hp: 70, speed: 190, armor: 0, reward: 25, color: '#00ff00', radius: 9 },
     BRUISER:   { type: 'bruiser', hp: 500, speed: 45, armor: 25, reward: 60, color: '#8b0000', radius: 18 },
     SHIELD:    { type: 'shield', hp: 120, speed: 80, armor: 5, shield: 200, reward: 50, color: '#4169e1', radius: 14 },
@@ -20,7 +20,10 @@ export const EnemyTypes = {
     DRONE:     { type: 'drone', hp: 60, speed: 240, armor: 0, reward: 40, color: '#00ced1', radius: 8 },
     PHANTOM:   { type: 'phantom', hp: 600, speed: 145, armor: 5, reward: 200, color: '#dda0dd', radius: 14 },
     OVERLORD:  { type: 'overlord', hp: 10000, speed: 30, armor: 90, reward: 1500, color: '#8b008b', radius: 38 },
-    GOD:       { type: 'god', hp: 30000, speed: 28, armor: 110, reward: 5000, color: '#ffd700', radius: 45 }
+    GOD:       { type: 'god', hp: 30000, speed: 28, armor: 110, reward: 5000, color: '#ffd700', radius: 45 },
+    // Добавь это внутрь EnemyTypes в файле Enemy.js
+    BOSS_1:    { type: 'boss_1', hp: 1500, speed: 25, armor: 45, reward: 500, color: '#ff0000', radius: 30 }
+
 };
 
 export class Enemy {
