@@ -260,4 +260,5 @@ ctx.fillText(`❤️ ${this.baseHp}`, 10, 40);
         ctx.font = 'bold 16px sans-serif'; ctx.fillStyle = '#fff';
         ctx.fillText("КЛИКНИТЕ ДЛЯ ПРОДОЛЖЕНИЯ", 500, 340);
     }
+}
     
